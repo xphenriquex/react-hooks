@@ -1,52 +1,90 @@
-import { forwardRef, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
+import { Component, useEffect, useState } from 'react';
 
-function App()  {
-  const [counted, setCounted] = useState([0, 1, 2, 3, 4]);
-  const divRef = useRef();
+const s = {
+  style: {
+    fontSize: '60px',
+  },
+};
 
-  useLayoutEffect(() => {
-    const now = Date.now();
-    while (Date.now() < now + 300);
-    divRef.current.divRef.scrollTop = divRef.current.divRef.scrollHeight;
-  });
+class MyErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
 
-  const handleClick = () => {
-    setCounted((c) => [...c, +c.slice(-1) + 1]);
-    divRef.current.handleClick();
-  };
+  static getDerivedStateFromError(error) {
+    // Atualiza o state para que a próxima renderização mostre a UI alternativa.
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    // Você também pode registrar o erro em um serviço de relatórios de erro
+    // console.log(error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      // Você pode renderizar qualquer UI alternativa
+      return <p {...s}>Deu ruim =(</p>;
+    }
+
+    return this.props.children;
+  }
+}
+
+const ItWillThrowError = () => {
+  const [counter, setCounter] = useState(0);
+
+  useEffect(() => {
+    if (counter > 3) {
+      throw new Error('Que chato!!!');
+    }
+  }, [counter]);
 
   return (
-    <>
-      <button onClick={handleClick}>Count {counted.slice(-1)}</button>
-      <DisplayCounted counted={counted} ref={divRef} />
-    </>
+    <div>
+      <button {...s} onClick={() => setCounter((s) => s + 1)}>
+        Click to increase {counter}
+      </button>
+    </div>
   );
 };
 
-export const DisplayCounted = forwardRef(function DisplayCounted({ counted }, ref) {
-  const [rand, setRand] = useState('0.24');
-  const divRef = useRef();
-
-  const handleClick = () => {
-    setRand(Math.random().toFixed(2));
-  };
-
-  useImperativeHandle(ref, () => ({
-    handleClick,
-    divRef: divRef.current,
-  }));
-
+function App() {
   return (
-    <div ref={divRef} style={{ height: '100px', width: '100px', overflowY: 'scroll' }}>
-      {counted.map((c) => {
-        return (
-          <p onClick={handleClick} key={`c-${c}`}>
-            {c} +++ {rand}
-          </p>
-        );
-      })}
+    <div {...s}>
+      <MyErrorBoundary>
+        <ItWillThrowError />
+      </MyErrorBoundary>
+      <MyErrorBoundary>
+        <ItWillThrowError />
+      </MyErrorBoundary>
+      <MyErrorBoundary>
+        <ItWillThrowError />
+      </MyErrorBoundary>
+      <MyErrorBoundary>
+        <ItWillThrowError />
+      </MyErrorBoundary>
+      <MyErrorBoundary>
+        <ItWillThrowError />
+      </MyErrorBoundary>
+      <MyErrorBoundary>
+        <ItWillThrowError />
+      </MyErrorBoundary>
+      <MyErrorBoundary>
+        <ItWillThrowError />
+      </MyErrorBoundary>
+      <MyErrorBoundary>
+        <ItWillThrowError />
+      </MyErrorBoundary>
+      <MyErrorBoundary>
+        <ItWillThrowError />
+      </MyErrorBoundary>
+      <MyErrorBoundary>
+        <ItWillThrowError />
+      </MyErrorBoundary>
     </div>
   );
-});
+};
 
 export default App;
