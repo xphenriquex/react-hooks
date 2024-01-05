@@ -1,63 +1,29 @@
-// Compound Components
-import {  createContext, useContext, useState } from 'react';
+import React, { Suspense, useState } from 'react';
+// import LazyComponent from './lazy-component';
 
-const s = {
-  style: {
-    fontSize: '60px',
-  },
+const loadComponent = () => {
+  console.log('Componente carregando...');
+  return import('./lazy-component');
 };
 
-const TurnOnOffContext = createContext();
+//lazy loading
+// const LazyComponent = React.lazy(() => import('./lazy-component'));
 
-const TurnOnOff = ({ children }) => {
-  const [isOn, setIsOn] = useState(false);
-  const onTurn = () => setIsOn((s) => !s);
-
-  return (
-    <TurnOnOffContext.Provider value={{ isOn, onTurn }}>
-      {children}
-    </TurnOnOffContext.Provider>
-  );
-};
-const TurnedOn = ({ children }) => {
-  const { isOn } = useContext(TurnOnOffContext);
-  return isOn ? children : null;
-}
-
-const TurnedOff = ({ children }) => {
-  const { isOn } = useContext(TurnOnOffContext);
-  return isOn ? null : children;
-}
-
-
-const TurnButton = ({ ...props }) => {
-  const { isOn, onTurn } = useContext(TurnOnOffContext);
-  return (
-    <button onClick={onTurn} {...props}>
-      Turn {isOn ? 'OFF' : 'ON'}
-    </button>
-  );
-};
-const P = ({ children }) => <p {...s}>{children}</p>;
+//eager loading
+const LazyComponent = React.lazy(loadComponent);
 
 function App() {
-  return (
-    <TurnOnOff>
-      <div>
-        <header>
-          <TurnedOn>
-            <P>Aqui as coisas que vão acontecer quando estiver ON.</P>
-          </TurnedOn>
-        </header>
+  const [show, setShow] = useState(false);
 
-        <section>
-          <TurnedOff>
-            <P>Aqui vem as coisas do OFF.</P>
-          </TurnedOff>
-          <TurnButton {...s} />
-        </section>
-      </div>
-    </TurnOnOff>
+  return (
+    <div>
+      <p>
+        <button onMouseOver={loadComponent} onClick={() => setShow((s) => !s)}>
+          Show {show ? 'LC on screen' : 'LC is off screen'}
+        </button>
+      </p>
+      <Suspense fallback={<p>Carregando...</p>}>{show && <LazyComponent />}</Suspense>
+    </div>
   );
 };
 
